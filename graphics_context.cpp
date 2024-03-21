@@ -3,14 +3,8 @@
 namespace vl {
 
 static bool window_exists = false;
-int GraphicsContext::get_id() {
-    
-    assert(GraphicsContext::current_id != NULL);
-    int id = *GraphicsContext::current_id;
-    *GraphicsContext::current_id++;
+static std::vector<Entity*> entities;
 
-    return id;
-}
 
 GraphicsContext::GraphicsContext(int width, int height, std::string name, int fps) {
     if (window_exists) {
@@ -20,23 +14,65 @@ GraphicsContext::GraphicsContext(int width, int height, std::string name, int fp
     screen_height = height;
     InitWindow(screen_width, screen_height, "raylib [core] example - basic window");
 
-    SetTargetFPS(144);
+    SetTargetFPS(fps);
 
     window_exists = true;
-    current_id = &id_counter;
 }
 
 void GraphicsContext::run() {
+    scene.init(*this);
     while (!WindowShouldClose()) {
-        time_s = std::chrono::duration_cast<std::chrono::milliseconds>(
+        time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
-        ).count()/1000;
+        ).count();
+        scene.draw(*this);
     }
 
     CloseWindow();
 }
-float GraphicsContext::get_time_s() {
-    return time_s;
+long long GraphicsContext::get_time_ms() {
+    return time_ms;
+}
+
+void GraphicsContext::set_scene(Scene scene) {
+    this->scene = scene;
+}
+
+void Scene::init(GraphicsContext& ctx) {
+    for (auto& entity : entities) {
+        for (auto& component : entity->components) {
+            component->init(ctx);
+        }
+    }
+}
+
+void Scene::draw(GraphicsContext& ctx) {
+    for (auto& entity : entities) {
+        for (auto& component : entity->components) {
+            component->update_time(ctx);
+            component->run(ctx);
+        }
+    }
+    BeginDrawing();
+    ClearBackground(BLACK);
+    
+    for (auto& entity : entities) {
+        DrawTextureEx(entity->surf, entity->transform.translation,
+                    entity->transform.rot_rad,
+                    entity->transform.scale,
+                    Color {255, 255, 255, 255});
+    }   
+
+    EndDrawing();
+}
+
+void Scene::add_entity(Entity* entity) {
+    entities.push_back(entity);
+}
+
+void Entity::add_component(std::unique_ptr<Component> component) {
+    component->set_entity(this);
+    this->components.push_back(std::move(component));
 }
 
 

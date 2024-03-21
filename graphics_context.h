@@ -1,75 +1,77 @@
 #pragma once
 #include <cassert>
 #include <functional>
+#include <memory>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <memory>
+
+#include "vlmath.h"
 #include "raylib.h"
 
 namespace vl {
 
-class GraphicsContext {
-    static uint64_t* current_id;
-    static int get_id();
+class Entity;
+class GraphicsContext;
 
+class Scene {
+   public:
+    void add_entity(Entity* entity);
+    void draw(GraphicsContext& ctx);
+    void init(GraphicsContext& ctx);
+   private:
+    std::vector<Entity*> entities;
+};
+
+class GraphicsContext {
    public:
     GraphicsContext(int width, int height, std::string name, int fps = 144);
     void run();
+    void set_scene(Scene scene);
     float screen_width;
     float screen_height;
-    float time_s = 0;
-    float get_time_s();
+    long long time_ms = 0;
+    long long get_time_ms();
     uint64_t id_counter = 0;
 
-   private:
+    Scene scene;
 };
-uint64_t* GraphicsContext::current_id = nullptr;
 
+class Component {
+   public:
+    Component(Scene& scene) : scene{scene} {}
+    virtual void init(GraphicsContext& ctx) = 0;
+    virtual void run(GraphicsContext& ctx) = 0  ;
+    virtual ~Component() = default;
 
-template <class T>
+    void update_time(GraphicsContext& ctx) {
+        long long time_ms = ctx.get_time_ms();
+        dt_s = (time_ms - last_time_ms) / 1000.0;
+        last_time_ms = time_ms;
+    }
+    void set_entity(Entity* entity) {
+        this->entity = entity;
+    }
+   protected:
+    long long last_time_ms = 0;
+    double dt_s;
+    Scene& scene;
+    Entity* entity;
+};
+
 class Entity {
    public:
-    uint64_t id = 0;
-    std::shared_ptr<T> value;
-    Entity(std::shared_ptr<T> value) : value{value} {
-        id = GraphicsContext::get_id(); 
-    }
-    
-    T* operator->() { return value.get(); }
-
-    T& operator*() { return *value; }
+    Entity(Scene& scene) : scene{scene} {
+        scene.add_entity(this);
+    };
+    Transform2 transform;
+    void add_component(std::unique_ptr<Component> component);
+    // TODO: Should this be unique?
+    std::vector<std::unique_ptr<Component>> components;
+    Texture2D surf;
+   private:
+    Scene& scene;
 };
 
-class Behavior {
-   public:
-    virtual void init(GraphicsContext& ctx, int id);
-    virtual void run(GraphicsContext& ctx, int id);
-    void update_time(GraphicsContext& ctx) {
-        float time_s = ctx.get_time_s();
-        dt_s = time_s - last_time_s;
-        last_time_s = time_s;
-    }
-
-   protected:
-    float last_time_s = 0;
-    float dt_s;
-};
-
-class Object {
-   public:
-    std::vector<Entity<Behavior>> behaviors;
-    void init(GraphicsContext& ctx) {
-        for (auto& b : behaviors) {
-            b->init(ctx, b.id);
-        }
-    }
-
-    void run(GraphicsContext& ctx) {
-        for (auto& b : behaviors) {
-            b->update_time(ctx);
-            b->run(ctx, b.id);
-        }
-    }
-};
 
 }  // namespace vl
