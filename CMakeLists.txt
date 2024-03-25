@@ -1,6 +1,6 @@
 find_package(OpenGL REQUIRED)
 
-add_library (engine graphics_context.cpp)
+add_library (engine graphics_context.cpp geometry.cpp)
 
 set(RAYLIB_VERSION 4.5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED

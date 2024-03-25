@@ -8,15 +8,18 @@
 
 #include "vlmath.h"
 #include "raylib.h"
-
+#include "raymath.h"
 namespace vl {
 
 class Entity;
 class GraphicsContext;
 
+Image create_blank(int width, int height, Color initial = Color{0, 0, 0, 255});
+
 class Scene {
    public:
     void add_entity(Entity* entity);
+    void run(GraphicsContext& ctx);
     void draw(GraphicsContext& ctx);
     void init(GraphicsContext& ctx);
    private:

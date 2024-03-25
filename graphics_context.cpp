@@ -5,6 +5,17 @@ namespace vl {
 static bool window_exists = false;
 static std::vector<Entity*> entities;
 
+Image create_blank(int width, int height, Color initial) {
+    Color* data = (Color*)malloc(width * height * sizeof(Color));
+    
+    for (int i = 0; i < width * height; i++) {
+        data[i] = initial;
+    }
+
+    // PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 is the same layout as color.
+    Image img = Image {data, width, height, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+    return img;
+}
 
 GraphicsContext::GraphicsContext(int width, int height, std::string name, int fps) {
     if (window_exists) {
@@ -25,6 +36,9 @@ void GraphicsContext::run() {
         time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
+        // Should these be split into separate threads?
+        // Maybe just use scheduler
+        scene.run(*this);
         scene.draw(*this);
     }
 
@@ -46,13 +60,16 @@ void Scene::init(GraphicsContext& ctx) {
     }
 }
 
-void Scene::draw(GraphicsContext& ctx) {
+void Scene::run(GraphicsContext& ctx) {
     for (auto& entity : entities) {
         for (auto& component : entity->components) {
             component->update_time(ctx);
             component->run(ctx);
         }
     }
+}
+
+void Scene::draw(GraphicsContext& ctx) {
     BeginDrawing();
     ClearBackground(BLACK);
     
