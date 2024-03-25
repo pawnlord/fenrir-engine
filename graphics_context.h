@@ -44,7 +44,7 @@ class Component {
    public:
     Component(Scene& scene) : scene{scene} {}
     virtual void init(GraphicsContext& ctx) = 0;
-    virtual void run(GraphicsContext& ctx) = 0  ;
+    virtual void run(GraphicsContext& ctx) = 0;
     virtual ~Component() = default;
 
     void update_time(GraphicsContext& ctx) {

@@ -21,7 +21,17 @@ struct Box {
 
 class Rectangle : public Entity {
    public:
-    Rectangle(Scene& scene) : Entity{scene} {}
+    Rectangle(int width, int height, Scene& scene, Color color = Color{0, 0, 255, 255}) 
+        : Entity{scene}, width{width}, height{height}, color{color} {
+        unsigned char* data = (unsigned char*)calloc(width*height*3, sizeof(unsigned char));
+        
+        Image image = Image {data, width, height, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8};
+        ImageDrawRectangle(&image, 0, 0, width, height, color);
+        
+        surf = LoadTextureFromImage(image);
+
+        free(data);
+    }
 
     inline Vector2 get_x1y1() const {
         Vector2 p = Vector2{transform.translation.x - (width / 2), transform.translation.y - (height / 2)};
@@ -51,8 +61,9 @@ class Rectangle : public Entity {
 
     bool intersects(const Rectangle& other) const;
 
-    int width = 0;
-    int height = 0;
+    int width;
+    int height;
+    Color color;
 };
 
 }  // namespace vl
