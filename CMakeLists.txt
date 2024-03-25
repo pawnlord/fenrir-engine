@@ -1,4 +1,16 @@
+cmake_minimum_required (VERSION 3.14)
+project (engine)
+
+
 find_package(OpenGL REQUIRED)
+enable_testing()
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library (engine graphics_context.cpp geometry.cpp)
 
@@ -22,3 +34,5 @@ endif()
 
 target_include_directories (engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(engine LINK_PUBLIC raylib)
+
+add_subdirectory(tests)
