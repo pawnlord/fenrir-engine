@@ -12,11 +12,19 @@ template<class T>
 inline Vector2 operator*(Vector2 rhs, T const& scalar) {
     return Vector2Scale(rhs, scalar);
 }
+template<class T>
+inline Vector2 operator/(Vector2 rhs, T const& scalar) {
+    return Vector2Scale(rhs, 1/scalar);
+}
 
 inline Vector2 operator+(Vector2 const& lhs, Vector2 rhs) {
     return Vector2Add(lhs, rhs);
 }
 
+inline Vector2 operator+=(Vector2& lhs, Vector2 rhs) {
+    lhs = Vector2Add(lhs, rhs);
+    return lhs;
+}
 inline Vector2 operator-(Vector2 const& vec) {
     return -1 * vec;
 }
@@ -25,6 +33,10 @@ inline Vector2 operator-(Vector2 const& lhs, Vector2 rhs) {
     return lhs + -1 * rhs;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const Vector2& v) {
+    os << "(" << v.x << ", " << v.y << ")";
+    return os;
+}
 
 inline Vector2 rotate(float rot_rad, Vector2 v) {
     float curr_rot = atan2(v.y, v.x);
@@ -35,6 +47,10 @@ inline Vector2 rotate(float rot_rad, Vector2 v) {
 
 inline float dot(const Vector2& us, const Vector2& other) {
     return (us.x * other.x) + (us.y * other.y);
+}
+// Normalize CCW
+inline Vector2 normal(const Vector2& v) {
+    return Vector2Normalize(Vector2 {v.y, -v.x});
 }
 
 struct Transform2 {

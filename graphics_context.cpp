@@ -1,7 +1,11 @@
 #include "graphics_context.h"
+#include "geometry.h"
 #include <chrono>
 namespace vl {
 
+int Tag::next_value = 0;
+Tag no_tag = Tag::next();
+Tag PhysicsEntity::physics_tag = Tag::next();
 static bool window_exists = false;
 static std::vector<Entity*> entities;
 
@@ -38,8 +42,8 @@ void GraphicsContext::run() {
         ).count();
         // Should these be split into separate threads?
         // Maybe just use scheduler
-        scene.run(*this);
         scene.draw(*this);
+        scene.run(*this);
     }
 
     CloseWindow();
@@ -74,12 +78,16 @@ void Scene::draw(GraphicsContext& ctx) {
     ClearBackground(BLACK);
     
     for (auto& entity : entities) {
-        DrawTextureEx(entity->surf, entity->transform.translation,
-                    entity->transform.rot_rad,
+        DrawTextureEx(entity->surf, entity->transform.translation - entity->center,
+                    (entity->transform.rot_rad * 180) / PI,
                     entity->transform.scale,
                     Color {255, 255, 255, 255});
+        PhysicsEntity *phys_entity = dynamic_cast<PhysicsEntity*>(entity);
+        if (phys_entity != nullptr) {
+            draw_arrow(entity->transform.translation, phys_entity->vel);
+        }
     }   
-
+    
     EndDrawing();
 }
 
@@ -92,5 +100,93 @@ void Entity::add_component(std::unique_ptr<Component> component) {
     this->components.push_back(std::move(component));
 }
 
+bool Entity::has_tag(const Tag& t) {
+    for (const auto& tag : tags) {
+        if (tag.value == t.value) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Entity::has_enabled_tag(const Tag& t) {
+    for (const auto& tag : tags) {
+        if (tag.value == t.value) {
+            if (!tag.enabled) {
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+void Entity::add_tag(const Tag& t) {
+    tags.push_back(t);
+}
+
+Tag Entity::find_tag(const Tag& t) {
+    for (const auto& tag : tags) {
+        if (tag.value == t.value) {   
+            return tag;
+        }
+    }
+    return no_tag;
+}
+
+bool PhysicsEntity::intersects(const PhysicsEntity& other) const {
+    return other.get_polygon().intersects(this->get_polygon());
+}
+
+void PhysicsEntity::Physics::run(vl::GraphicsContext& ctx) {
+
+    PhysicsEntity* phys_entity = dynamic_cast<PhysicsEntity*>(entity);
+    if (!phys_entity->floating) {
+        // Gravity
+        phys_entity->vel.y += 1000 * dt_s;
+    }
+
+
+    if (!phys_entity->floating) {
+        for (Entity* other : scene.get_entities()) {
+            if (other == entity) {
+                continue;
+            }
+            PhysicsEntity *phys_other = dynamic_cast<PhysicsEntity*>(other);
+            if (phys_other != nullptr) {
+                if (phys_entity->intersects(*phys_other)) {
+                    Vector2 normal = phys_other->get_normal(entity->transform.translation, phys_entity->vel);
+                    while (phys_entity->intersects(*phys_other)) {
+                        entity->transform.translation = entity->transform.translation + (normal * 0.01); 
+                    }
+                    std::cout << "normal  " << normal << std::endl;
+                    std::cout << "vel " << phys_entity->vel << std::endl;
+                    std::cout << "dot " << dot(phys_entity->vel, normal) << std::endl;
+                    phys_entity->vel = phys_entity->vel - (normal * dot(phys_entity->vel, normal)); 
+                    std::cout << "dot " << dot(phys_entity->vel, normal) << std::endl;
+                }
+            }
+        }
+    }
+    entity->transform.translation.x += phys_entity->vel.x * dt_s;
+    entity->transform.translation.y += phys_entity->vel.y * dt_s;
+    entity->transform.rot_rad += phys_entity->vtheta * dt_s;
+    draw_arrow(entity->transform.translation, phys_entity->vel);
+}
+
+void draw_arrow(Vector2 v, Vector2 direction) {
+    std::cout << v.x << ", " << v.y << " -> " << direction.x << ", " << direction.y << std::endl;
+    DrawLine(v.x, v.y,
+              v.x + direction.x, v.y + direction.y,
+              Color {255, 0, 0});
+}
 
 }  // namespace vl
+
+
+void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, Vector2 rotCenter, float scale, Color tint) {
+    Rectangle source = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    Rectangle dest = { position.x, position.y, (float)texture.width*scale, (float)texture.height*scale };
+    Vector2 origin = { 0.0f, 0.0f };
+
+    DrawTexturePro(texture, source, dest, origin, rotation, tint);
+}
