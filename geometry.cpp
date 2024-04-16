@@ -130,6 +130,7 @@ Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
     for (int i = 0; i < box.points.size() - 1; i++) {
         lines.push_back(std::pair<Vector2, Vector2>(box.points[i], box.points[i + 1]));
     }
+    lines.push_back(std::pair<Vector2, Vector2>(box.points[box.points.size() - 1], box.points[0]));
 
     while (true) {
         std::vector<std::pair<Vector2, Vector2>> new_lines;
@@ -156,5 +157,22 @@ Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
     }
 
 }
-
+void Rectangle::handle_collision(PhysicsEntity* phys_other) {
+    Polygon boxed = this->box();
+    int point_idx = 0;
+    float min_distance = Vector2Distance(boxed.points[0], phys_other->transform.translation + phys_other->center);
+    for (int i = 0; i < boxed.points.size(); i++) {
+        float distance = Vector2Distance(boxed.points[i], phys_other->transform.translation + phys_other->center);
+        if (distance < min_distance) {
+            point_idx  = i;
+            min_distance = distance;
+        }
+    }
+    Vector2 normal = phys_other->get_normal(boxed.points[point_idx], this->vel);
+    PhysicsEntity* phys_this = dynamic_cast<PhysicsEntity*>(this);
+    while (phys_this->intersects(*phys_other)) {
+        this->transform.translation = this->transform.translation + (normal * 0.01); 
+    }
+    this->vel = this->vel - (normal * dot(this->vel, normal) * this->bounce);    
+}
 }  // namespace vl

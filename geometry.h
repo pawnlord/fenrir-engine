@@ -54,8 +54,9 @@ class Rectangle : public PhysicsEntity {
         ImageDrawRectangle(&image, 0, 0, width, height, color);
         
         surf = LoadTextureFromImage(image);
-
         free(data);
+
+        center = {(float)width/2, (float)height/2};
     }
 
     inline Vector2 get_x1y1() const {
@@ -88,6 +89,8 @@ class Rectangle : public PhysicsEntity {
     };
 
     virtual Vector2 get_normal(Vector2 v, Vector2 direction) const override;
+    
+    virtual void handle_collision(PhysicsEntity* phys_other) override;
 
     bool intersects(const Rectangle& other) const;
 

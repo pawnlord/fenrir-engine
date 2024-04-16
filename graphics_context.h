@@ -46,7 +46,6 @@ class GraphicsContext {
     Scene scene;
 };
 
-void DrawTextureCentered(Texture2D texture, Vector2 position, float rotation, Vector2 rotCenter, float scale, Color tint);
 
 
 class Component {
@@ -140,13 +139,25 @@ class PhysicsEntity : public Entity {
     PhysicsEntity(Scene& scene) : Entity{scene} {
         add_component(std::make_unique<Physics>(scene));
     }
-    
+
     virtual Polygon get_polygon() const = 0;
     virtual Vector2 get_normal(Vector2 v, Vector2 direction) const = 0;
+    
+    virtual void handle_collision(PhysicsEntity* phys_other) {
+        Vector2 normal = phys_other->get_normal(this->transform.translation, this->vel);
+        while (this->intersects(*phys_other)) {
+            this->transform.translation = this->transform.translation + (normal * 0.01); 
+        }
+        this->vel = this->vel - (normal * dot(this->vel, normal) * this->bounce);    
+    }
+
     bool intersects(const PhysicsEntity& other) const;
 
     Vector2 vel{0, 0};
     float vtheta = 0.0;
+
+    // Some niche dials to turn
+    float bounce = 1.0;
 
     bool floating = false;
    protected:
@@ -167,3 +178,6 @@ class PhysicsEntity : public Entity {
 
 void draw_arrow(Vector2 v, Vector2 direction);
 }  // namespace vl
+
+// Outside because it uses Raylib primitives which overlap with vl
+void draw_texture_centered(Texture2D texture, Vector2 position, float rotation, Vector2 rotCenter, float scale, Color tint);
