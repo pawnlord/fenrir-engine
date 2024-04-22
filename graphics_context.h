@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "input.h"
 #include "vlmath.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -41,8 +42,9 @@ class GraphicsContext {
     float screen_height;
     long long time_ms = 0;
     long long get_time_ms();
+    
     uint64_t id_counter = 0;
-
+    InputManager input;
     Scene scene;
 };
 

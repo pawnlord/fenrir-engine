@@ -40,8 +40,9 @@ void GraphicsContext::run() {
         time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
-        // Should these be split into separate threads?
-        // Maybe just use scheduler
+        
+        input.run_input_handler(time_ms);
+
         scene.draw(*this);
         scene.run(*this);
     }
