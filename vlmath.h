@@ -29,6 +29,10 @@ inline Vector2 operator-(Vector2 const& vec) {
     return -1 * vec;
 }
 
+inline bool operator==(Vector2 const& lhs, Vector2 const& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
 inline Vector2 operator-(Vector2 const& lhs, Vector2 rhs) {
     return lhs + -1 * rhs;
 }
@@ -64,8 +68,12 @@ struct Transform2 {
         Vector2 rotated = rotate(rot_rad, scaled);
         return translation + rotated;
     }
-
-        
+    
+    inline Vector2 transform(Vector2 p, Vector2 center) const {
+        Vector2 scaled = scale * (p - translation - center);
+        Vector2 rotated = rotate(rot_rad, scaled);
+        return translation + center + rotated;
+    }    
 };
 
 }

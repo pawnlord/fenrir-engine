@@ -85,7 +85,7 @@ void Scene::draw(GraphicsContext& ctx) {
 // #ifdef NDEBUG
         PhysicsEntity *phys_entity = dynamic_cast<PhysicsEntity*>(entity);
         if (phys_entity != nullptr) {
-            draw_arrow(entity->transform.translation, phys_entity->vel);
+            draw_arrow(entity->transform.translation + entity->center, phys_entity->vel);
         }
 // #endif
 
@@ -161,6 +161,7 @@ void PhysicsEntity::Physics::run(vl::GraphicsContext& ctx) {
             }
         }
     }
+    phys_entity->old_transform = entity->transform;
     entity->transform.translation.x += phys_entity->vel.x * dt_s;
     entity->transform.translation.y += phys_entity->vel.y * dt_s;
     entity->transform.rot_rad += phys_entity->vtheta * dt_s;

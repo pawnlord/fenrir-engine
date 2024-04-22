@@ -135,7 +135,8 @@ Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
     while (true) {
         std::vector<std::pair<Vector2, Vector2>> new_lines;
         for (const auto& line : lines) {
-            if (orientation(line.first, line.second, v) == Orientation::CW) {
+            Orientation o = orientation(line.first, line.second, v);
+            if (o == Orientation::CW || o == Orientation::Colinear) {
                 new_lines.push_back(line);
             }
         }
@@ -158,17 +159,20 @@ Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
 
 }
 void Rectangle::handle_collision(PhysicsEntity* phys_other) {
-    Polygon boxed = this->box();
+    Polygon boxed = this->old_box();
     int point_idx = 0;
-    float min_distance = Vector2Distance(boxed.points[0], phys_other->transform.translation + phys_other->center);
+    float min_distance = Vector2Distance(boxed.points[0], phys_other->old_transform.translation + phys_other->center);
     for (int i = 0; i < boxed.points.size(); i++) {
-        float distance = Vector2Distance(boxed.points[i], phys_other->transform.translation + phys_other->center);
+        float distance = Vector2Distance(boxed.points[i], phys_other->old_transform.translation + phys_other->center);
         if (distance < min_distance) {
             point_idx  = i;
             min_distance = distance;
         }
     }
     Vector2 normal = phys_other->get_normal(boxed.points[point_idx], this->vel);
+    if (normal == Vector2{0, 0}) {
+        return;
+    }
     PhysicsEntity* phys_this = dynamic_cast<PhysicsEntity*>(this);
     while (phys_this->intersects(*phys_other)) {
         this->transform.translation = this->transform.translation + (normal * 0.01); 

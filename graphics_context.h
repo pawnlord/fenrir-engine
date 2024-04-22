@@ -146,7 +146,7 @@ class PhysicsEntity : public Entity {
     virtual Vector2 get_normal(Vector2 v, Vector2 direction) const = 0;
     
     virtual void handle_collision(PhysicsEntity* phys_other) {
-        Vector2 normal = phys_other->get_normal(this->transform.translation, this->vel);
+        Vector2 normal = phys_other->get_normal(this->old_transform.translation, this->vel);
         while (this->intersects(*phys_other)) {
             this->transform.translation = this->transform.translation + (normal * 0.01); 
         }
@@ -162,8 +162,12 @@ class PhysicsEntity : public Entity {
     float bounce = 1.0;
 
     bool floating = false;
+
+    Transform2 old_transform;
    protected:
     static Tag physics_tag;
+
+    // Transform for dealing with finding the direction of collision
 
     class Physics : public Component {
        public:

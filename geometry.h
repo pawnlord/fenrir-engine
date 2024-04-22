@@ -59,34 +59,44 @@ class Rectangle : public PhysicsEntity {
         center = {(float)width/2, (float)height/2};
     }
 
-    inline Vector2 get_x1y1() const {
-        Vector2 p = Vector2{transform.translation.x, transform.translation.y};
-        return transform.transform(p);
+    inline Vector2 get_x1y1(Transform2 trans) const {
+        Vector2 p = Vector2{trans.translation.x, trans.translation.y};
+        return transform.transform(p, center);
     }
-    inline Vector2 get_x2y1() const {
-        Vector2 p = Vector2{transform.translation.x + width, transform.translation.y};
-        return transform.transform(p);
+    inline Vector2 get_x2y1(Transform2 trans) const {
+        Vector2 p = Vector2{trans.translation.x + width, trans.translation.y};
+        return transform.transform(p, center);
     }
-    inline Vector2 get_x1y2() const {
-        Vector2 p = Vector2{transform.translation.x, transform.translation.y + height};
-        return transform.transform(p);
+    inline Vector2 get_x1y2(Transform2 trans) const {
+        Vector2 p = Vector2{trans.translation.x, trans.translation.y + height};
+        return transform.transform(p, center);
     }
-    inline Vector2 get_x2y2() const {
-        Vector2 p = Vector2{transform.translation.x + width, transform.translation.y + height};
-        return transform.transform(p);
+    inline Vector2 get_x2y2(Transform2 trans) const {
+        Vector2 p = Vector2{trans.translation.x + width, trans.translation.y + height};
+        return transform.transform(p, center);
     }
 
     inline Polygon box() const {
         return Polygon {
-            get_x1y1(),
-            get_x2y1(),
-            get_x2y2(),
-            get_x1y2(),
+            get_x1y1(transform),
+            get_x2y1(transform),
+            get_x2y2(transform),
+            get_x1y2(transform),
+        };
+    }
+    
+    inline Polygon old_box() const {
+        return Polygon {
+            get_x1y1(old_transform),
+            get_x2y1(old_transform),
+            get_x2y2(old_transform),
+            get_x1y2(old_transform),
         };
     }
     virtual Polygon get_polygon() const override {
         return box();
     };
+    
 
     virtual Vector2 get_normal(Vector2 v, Vector2 direction) const override;
     
