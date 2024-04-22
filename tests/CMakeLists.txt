@@ -13,8 +13,8 @@ add_executable (geometry geometry.cpp)
 add_executable (input input.cpp)
 
 
-target_link_libraries (geometry LINK_PUBLIC engine GTest::gtest_main)
-target_link_libraries (input LINK_PUBLIC engine GTest::gtest_main)
+target_link_libraries (geometry LINK_PUBLIC fenrir GTest::gtest_main)
+target_link_libraries (input LINK_PUBLIC fenrir GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(geometry)

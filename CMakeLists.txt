@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.14)
-project (engine)
+project (fenrir)
 
 
 find_package(OpenGL REQUIRED)
@@ -12,7 +12,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library (engine graphics_context.cpp geometry.cpp input.cpp)
+add_library (fenrir graphics_context.cpp geometry.cpp input.cpp)
 
 set(RAYLIB_VERSION 4.5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
@@ -32,7 +32,7 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
   endif()
 endif()
 
-target_include_directories (engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(engine LINK_PUBLIC raylib)
+target_include_directories (fenrir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(fenrir LINK_PUBLIC raylib)
 
 add_subdirectory(tests)

@@ -1,4 +1,4 @@
-# engine
+# fenrir
 A graphics engine for 2d games
 
 ## engine layout
@@ -19,23 +19,17 @@ Context: The window
 Scene: The current set of objects to be displayed. This draws images
 Entity: Contains the texture and transform, holds components
 Component: A behavior, something that runs every frame
-Tag: A piece of information about the entity
+Tag: A piece of information about the entity. Currently unused
+
+## Physics
+There is a naive physics engine, that can handle inelastic collision against "floating" (unmoving) objects. All collisions are handled through polygons, though currently only rectangles have been implemented.
 
 ## Input
-The necessary components of an input system are as follows:
-- A simple mapping from input action to functionality
-- A way to keep state between actions
-- Serialization and deserialization
-I would prefer for the method of keeping state to **not** be global variables.
-Heres the current idea:
-```
-InputInformation: to be inherited from. Contains the callback and metadata.
-By making this not  
-```
+Input is done through closures to store state. The current idiom will be returning a closure from an object that will then be able to act upon it.  
+2 buttons cannot be mapped to the same thing currently.  
+2 functions cannot be mapped to 2 buttons currently.  
+The only things buttons need to know about the outside world is their current state and a delta-time for smooth control.  
 
 ## TODO
 1. Better debug information
-2. Testing for Rectangle collisions
-3. Optimize Rectangle collisions if need be
-4. Polygonal collisions
-5. Center rectangles
+2. Polygonal collisions
