@@ -147,7 +147,11 @@ void PhysicsEntity::Physics::run(vl::GraphicsContext& ctx) {
         // Gravity
         phys_entity->vel.y += 1000 * dt_s;
     }
-
+    
+    entity->transform.translation.x += phys_entity->vel.x * dt_s;
+    entity->transform.translation.y += phys_entity->vel.y * dt_s;
+    entity->transform.rot_rad += phys_entity->vtheta * dt_s;
+    phys_entity->intersecting = false;
     if (!phys_entity->floating) {
         for (Entity* other : scene.get_entities()) {
             if (other == entity) {
@@ -157,14 +161,12 @@ void PhysicsEntity::Physics::run(vl::GraphicsContext& ctx) {
             if (phys_other != nullptr) {
                 if (phys_entity->intersects(*phys_other)) {
                     phys_entity->handle_collision(phys_other);
+                    phys_entity->intersecting = true;
                 }
             }
         }
     }
     phys_entity->old_transform = entity->transform;
-    entity->transform.translation.x += phys_entity->vel.x * dt_s;
-    entity->transform.translation.y += phys_entity->vel.y * dt_s;
-    entity->transform.rot_rad += phys_entity->vtheta * dt_s;
 }
 
 void draw_arrow(Vector2 v, Vector2 direction) {
@@ -172,8 +174,8 @@ void draw_arrow(Vector2 v, Vector2 direction) {
               v.x + direction.x, v.y + direction.y,
               Color {255, 0, 0, 255});
     DrawTriangle(v + direction,
-                 v + direction - (Vector2Normalize(direction) * 10) + (normal(direction) * 10),
-                 v + direction - (Vector2Normalize(direction) * 10) - (normal(direction) * 10),
+                 v + direction - (Vector2Normalize(direction) * 10) + (vector2_get_normal(direction) * 10),
+                 v + direction - (Vector2Normalize(direction) * 10) - (vector2_get_normal(direction) * 10),
                  Color {255, 0, 0, 255});
 }
 

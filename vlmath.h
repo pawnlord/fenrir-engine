@@ -53,13 +53,15 @@ inline float dot(const Vector2& us, const Vector2& other) {
     return (us.x * other.x) + (us.y * other.y);
 }
 // Normalize CCW
-inline Vector2 normal(const Vector2& v) {
+inline Vector2 vector2_get_normal(const Vector2& v) {
     return Vector2Normalize(Vector2 {v.y, -v.x});
 }
 
+template <typename T> int signum(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 struct Transform2 {
-
-
     Vector2 translation = Vector2 {0.0, 0.0};    // Translation
     float rot_rad = 0.0;    // Rotation radians
     float scale = 1.0;

@@ -142,14 +142,14 @@ Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
         }
         if (new_lines.size() == 1) {
             Vector2 parallel = new_lines[0].second - new_lines[0].first;
-            return normal(parallel);
+            return vector2_get_normal(parallel);
         }
 
         if (new_lines.size() == 0) {
             Vector2 normal_vec = Vector2 {0, 0};
             for (const auto& line : lines) {
                 Vector2 parallel = line.second - line.first;
-                normal_vec = normal_vec + normal(parallel);
+                normal_vec = normal_vec + vector2_get_normal(parallel);
             }
             return Vector2Normalize(normal_vec);
         }
@@ -177,6 +177,8 @@ void Rectangle::handle_collision(PhysicsEntity* phys_other) {
     while (phys_this->intersects(*phys_other)) {
         this->transform.translation = this->transform.translation + (normal * 0.01); 
     }
-    this->vel = this->vel - (normal * dot(this->vel, normal) * this->bounce);    
+    this->vel = this->vel - (normal * dot(this->vel, normal) * this->bounce);
+    Vector2 parallel = vector2_get_normal(normal);
+    this->vel = vel - (signum(dot(vel, parallel)) * parallel * coeff_friction);
 }
 }  // namespace vl

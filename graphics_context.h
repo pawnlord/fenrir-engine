@@ -150,22 +150,30 @@ class PhysicsEntity : public Entity {
         while (this->intersects(*phys_other)) {
             this->transform.translation = this->transform.translation + (normal * 0.01); 
         }
-        this->vel = this->vel - (normal * dot(this->vel, normal) * this->bounce);    
+        this->vel = this->vel - (normal * dot(this->vel, normal) * this->bounce);
+
+        Vector2 parallel = vector2_get_normal(normal);
+        this->vel = vel - (signum(dot(vel, parallel)) * parallel * coeff_friction);
     }
 
     bool intersects(const PhysicsEntity& other) const;
+    bool is_intersecting() const {
+        return intersecting;
+    }
 
     Vector2 vel{0, 0};
     float vtheta = 0.0;
 
     // Some niche dials to turn
     float bounce = 1.0;
+    float coeff_friction = 0.0;
 
     bool floating = false;
 
     Transform2 old_transform;
    protected:
     static Tag physics_tag;
+    bool intersecting = false;
 
     // Transform for dealing with finding the direction of collision
 
