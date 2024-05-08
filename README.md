@@ -43,3 +43,6 @@ The only things buttons need to know about the outside world is their current st
     - List of currently needed tools:
         - Logging: As this is a game engine, exceptions are a good idea for some things. A mistake in a program should *never* crash in release. If the state is unrecoverable, pretend it isn't.
         - Hot reloading/save-states: Similar category of tools, which speed up prototype time drastically. It would be nice for the engine to be trivially serializable for most common use cases, which makes save-states a very tempting chioce. But, hot reloading is cool.
+
+## Known bugs
+ - Drawing glitch with polygon at angles: Unknown cause, looks like the line is segmented, with artifacts at the edges. Specifically was on the bottom line. Also seen: pentagonal stage had artifact at bottom.
