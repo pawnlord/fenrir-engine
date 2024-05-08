@@ -146,7 +146,7 @@ class PolygonEntity : public PhysicsEntity {
 
         unsigned char* data = (unsigned char*)calloc(width*height*4, sizeof(unsigned char));
         
-        Image image = Image {data, width, height, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+        Image image = Image {data, width, height+1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
         
         image_draw_polygon(image, base.points, color);
         
