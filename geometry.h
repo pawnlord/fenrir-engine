@@ -36,9 +36,8 @@ struct Polygon {
     bool intersects(const Polygon& other) const;
     inline Polygon transform(Transform2 transform, Vector2 center) const {
         std::vector<Vector2> new_points = points;
-        std::cout << "transform: " << transform.translation << ", " << transform.transform(Vector2 {0, 0}) << std::endl;
         for (int i = 0; i < new_points.size(); i++) {
-            new_points[i] = transform.transform(points[i], center) + transform.translation;
+            new_points[i] = transform.transform(points[i] + transform.translation, center);
         }
 
         return Polygon {new_points};
