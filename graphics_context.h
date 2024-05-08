@@ -191,6 +191,7 @@ class PhysicsEntity : public Entity {
 };
 
 void draw_arrow(Vector2 v, Vector2 direction);
+void image_draw_polygon(Image& img, std::vector<Vector2> lines, Color col = Color{0, 0, 255, 255});
 }  // namespace vl
 
 // Outside because it uses Raylib primitives which overlap with vl

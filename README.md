@@ -1,5 +1,5 @@
 # fenrir
-A graphics engine for 2d games
+A game engine for 2D games. Built using Raylib.
 
 ## engine layout
 

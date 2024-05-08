@@ -27,13 +27,15 @@ Orientation orientation(Vector2 p, Vector2 q, Vector2 r)  {
     return Orientation::CCW; 
 } 
 
-bool line_intersects(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2, bool colinear_intersection = true) {
-    Orientation o1 = orientation(p1, q1, p2); 
-    Orientation o2 = orientation(p1, q1, q2); 
-    Orientation o3 = orientation(p2, q2, p1); 
-    Orientation o4 = orientation(p2, q2, q1); 
-    
+bool line_intersects(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2, bool colinear_intersection) {
+    Orientation o1 = orientation(p1, p2, q1); 
+    Orientation o2 = orientation(p1, p2, q2); 
+    Orientation o3 = orientation(q1, q2, p1); 
+    Orientation o4 = orientation(q1, q2, p2); 
+
     if (o1 != o2 && o3 != o4) {
+        // std::cout << p1 << ", " << p2 << " and " << q1 << ", " << q2 << std::endl; 
+        // std::cout << (int)o1 << ", " << (int)o2 << ", " << (int)o3 << ", " << (int)o4 << std::endl; 
         return true;
     }
     
@@ -43,9 +45,8 @@ bool line_intersects(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2, bool coline
                 || (o2 == Orientation::Colinear && in_diagonals_box(p1, q2, q1))
                 || (o3 == Orientation::Colinear && in_diagonals_box(p2, p1, q2))
                 || (o4 == Orientation::Colinear && in_diagonals_box(p2, q1, q2));
-    } else {
-        return false;
-    }
+    } 
+    return false;
 }
 
 
@@ -89,25 +90,27 @@ bool Box::intersects(const Box& other) const {
 }
 
 bool Polygon::intersects(const Polygon& other) const {
-    if (this->points.size() == 4 && other.points.size() == 4) {
-        Box this_box {
-            this->points[0],
-            this->points[1],
-            this->points[3],
-            this->points[2],
-        };
-        Box other_box {
-            other.points[0],
-            other.points[1],
-            other.points[3],
-            other.points[2],
-        };
-        return this_box.intersects(other_box);
-    }
-    for (int i = 0; i < this->points.size() - 1; i++) { 
-        for (int j = 0; j < other.points.size() - 1; j++) {
-            if (line_intersects(this->points[i], this->points[i+1],
-                                other.points[i], other.points[i+1])) {
+    // if (this->points.size() == 4 && other.points.size() == 4) {
+    //     Box this_box {
+    //         this->points[0],
+    //         this->points[1],
+    //         this->points[3],
+    //         this->points[2],
+    //     };
+    //     Box other_box {
+    //         other.points[0],
+    //         other.points[1],
+    //         other.points[3],
+    //         other.points[2],
+    //     };
+    //     return this_box.intersects(other_box);
+    // }
+    int size = points.size();
+    int other_size = other.points.size();
+    for (int i = 0; i < size; i++) { 
+        for (int j = 0; j < other_size; j++) {
+            if (line_intersects(points[i % size], points[(i+1) % size],
+                                other.points[j % other_size], other.points[(j+1) % other_size])) {
                 return true;
             }
         }
@@ -115,22 +118,14 @@ bool Polygon::intersects(const Polygon& other) const {
     return false;
 }
 
-bool Rectangle::intersects(const Rectangle& other) const {
-    Polygon this_box = this->box();
-    Polygon other_box = other.box();
-
-    return this_box.intersects(other_box);
-}
-
-Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
-    Polygon box = this->box();
-
+Vector2 Polygon::get_normal(Vector2 v, Vector2 direction) const {
+    
     // Get counterclockwise lines
     std::vector<std::pair<Vector2, Vector2>> lines;
-    for (int i = 0; i < box.points.size() - 1; i++) {
-        lines.push_back(std::pair<Vector2, Vector2>(box.points[i], box.points[i + 1]));
+    for (int i = 0; i < points.size() - 1; i++) {
+        lines.push_back(std::pair<Vector2, Vector2>(points[i], points[i + 1]));
     }
-    lines.push_back(std::pair<Vector2, Vector2>(box.points[box.points.size() - 1], box.points[0]));
+    lines.push_back(std::pair<Vector2, Vector2>(points[points.size() - 1], points[0]));
 
     while (true) {
         std::vector<std::pair<Vector2, Vector2>> new_lines;
@@ -156,7 +151,18 @@ Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
         v = v + direction;
         lines = new_lines;
     }
+}
 
+bool Rectangle::intersects(const Rectangle& other) const {
+    Polygon this_box = this->box();
+    Polygon other_box = other.box();
+
+    return this_box.intersects(other_box);
+}
+
+Vector2 Rectangle::get_normal(Vector2 v, Vector2 direction) const {
+    Polygon box = this->box();
+    return box.get_normal(v, direction);
 }
 void Rectangle::handle_collision(PhysicsEntity* phys_other) {
     Polygon boxed = this->old_box();
@@ -181,4 +187,9 @@ void Rectangle::handle_collision(PhysicsEntity* phys_other) {
     Vector2 parallel = vector2_get_normal(normal);
     this->vel = vel - (signum(dot(vel, parallel)) * parallel * coeff_friction);
 }
+
+Vector2 PolygonEntity::get_normal(Vector2 v, Vector2 direction) const {
+    return old_box().get_normal(v, direction);
+}
+
 }  // namespace vl

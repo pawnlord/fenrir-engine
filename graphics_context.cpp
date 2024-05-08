@@ -179,6 +179,15 @@ void draw_arrow(Vector2 v, Vector2 direction) {
                  Color {255, 0, 0, 255});
 }
 
+// TODO: Make this fill in color
+void image_draw_polygon(Image& img, std::vector<Vector2> lines, Color col) {
+    int size = lines.size();
+    for (int i = 0; i <  size; i++) {
+        std::cout << i << std::endl;
+        ImageDrawLineV(&img, lines[i % size], lines[(i+1) % size], col);
+    }
+
+}
 
 }  // namespace vl
 
@@ -190,3 +199,5 @@ void draw_texture_centered(Texture2D texture, Vector2 position, float rotation, 
 
     DrawTexturePro(texture, source, dest, origin, rotation, tint);
 }
+
+

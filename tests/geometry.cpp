@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 // Demonstrate some basic assertions.
-TEST(IntersectionTest, BasicAssertions) {
+TEST(BoxIntersectionTest, BoxAsserts) {
     vl::Box box1 {
         Vector2{11.981, 82.680},
         Vector2{98.020, 40.228},
@@ -48,4 +48,72 @@ TEST(IntersectionTest, BasicAssertions) {
     
     ASSERT_FALSE(box2.intersects(box4));
     ASSERT_FALSE(box4.intersects(box2));
+}
+
+TEST(PolygonIntersectionTest, PolygonAsserts) {
+    vl::Polygon box1 {
+        Vector2{11.981, 82.680},
+        Vector2{98.020, 40.228},
+        Vector2{126.772, 98.502},
+        Vector2{40.733, 140.935},
+    };
+    vl::Polygon box2 {
+        Vector2{53.794, 89.545},
+        Vector2{139.832, 47.093},
+        Vector2{168.584, 105.367},
+        Vector2{82.545, 147.818},
+    };
+
+    vl::Polygon box3 {
+        Vector2{103.013, 142.082},
+        Vector2{167.170, 213.418},
+        Vector2{118, 256.870},
+        Vector2{54.689,185.534},
+    };
+    
+    vl::Polygon box4 {
+        Vector2{-2.084,100.505},
+        Vector2{-66.240, 29.169},
+        Vector2{-17.925, -14.283},
+        Vector2{46.231, 57.053},
+    };
+
+    ASSERT_TRUE(box1.intersects(box2));
+    ASSERT_TRUE(box2.intersects(box1));
+
+    ASSERT_TRUE(box1.intersects(box4));
+    ASSERT_TRUE(box4.intersects(box1));
+    
+    ASSERT_FALSE(box1.intersects(box3));
+    ASSERT_FALSE(box3.intersects(box1));
+
+    ASSERT_FALSE(box2.intersects(box3));
+    ASSERT_FALSE(box3.intersects(box2));
+
+    
+    ASSERT_FALSE(box2.intersects(box4));
+    ASSERT_FALSE(box4.intersects(box2));
+}
+
+TEST(LineIntersectionTest, LineAsserts) {
+    Vector2 p1 {
+        0.0,
+        0.0
+    };
+    Vector2 p2 {
+        0.0,
+        1.0
+    };
+    
+    Vector2 q1 {
+        1.0,
+        0.0
+    };
+    Vector2 q2 {
+        1.0,
+        1.0
+    };
+
+    ASSERT_FALSE(vl::line_intersects(p1, p2, q1, q2));
+
 }
